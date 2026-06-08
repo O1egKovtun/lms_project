@@ -182,8 +182,8 @@ def add_lesson(course_id):
 def get_lessons(course_id):
     lessons = course_svc.get_course_lessons(course_id)
     return jsonify({"success": True, "lessons": [
-        {"id": l.id, "title": l.title, "order": l.order,
-            "duration": l.duration_minutes}
+        {"id": item.id, "title": item.title, "order": item.order,
+            "duration": item.duration_minutes}
         for item in lessons
     ]})
 
