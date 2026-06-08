@@ -184,7 +184,7 @@ def get_lessons(course_id):
     return jsonify({"success": True, "lessons": [
         {"id": l.id, "title": l.title, "order": l.order,
             "duration": l.duration_minutes}
-        for l in lessons
+        for item in lessons
     ]})
 
 
