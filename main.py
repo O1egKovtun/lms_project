@@ -47,6 +47,47 @@ def handle_value_error(e):
     return jsonify({"success": False, "error": str(e)}), 400
 
 
+# ── Root ──────────────────────────────────────────────────────────────────────
+@app.route("/")
+def index():
+    return jsonify({
+        "service": "LMS Platform API",
+        "version": "1.0.0",
+        "status": "running",
+        "author": "Ковтун Олег, ФеП-32",
+        "endpoints": {
+            "health":      "GET  /health",
+            "users": [
+                "POST /users",
+                "GET  /users/<id>",
+                "POST /users/<id>/block",
+                "POST /users/authenticate",
+            ],
+            "courses": [
+                "GET  /courses",
+                "POST /courses",
+                "POST /courses/<id>/publish",
+                "POST /courses/<id>/lessons",
+                "GET  /courses/<id>/lessons",
+            ],
+            "enrollment": [
+                "POST   /enrollments",
+                "DELETE /enrollments/<uid>/<cid>",
+                "GET    /enrollments/<uid>/<cid>/progress",
+                "GET    /enrollments/<uid>/courses",
+                "POST   /lessons/<id>/complete",
+            ],
+            "quizzes": [
+                "POST /quizzes",
+                "POST /quizzes/<id>/questions",
+                "POST /quizzes/<id>/attempts",
+                "POST /attempts/<id>/submit",
+                "GET  /quizzes/<id>/results/<uid>",
+            ],
+        }
+    })
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 @app.route("/health")
 def health():

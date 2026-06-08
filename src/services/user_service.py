@@ -14,7 +14,8 @@ from src.utils.observers import EventBus, UserRegisteredEvent, UserBlockedEvent
 class UserService:
     EMAIL_REGEX = re.compile(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$')
 
-    def __init__(self, user_repo: InMemoryUserRepository, event_bus: EventBus = None):
+    def __init__(self, user_repo: InMemoryUserRepository,
+                 event_bus: EventBus = None):
         self._repo = user_repo
         self._event_bus = event_bus or EventBus()
 
@@ -43,7 +44,10 @@ class UserService:
             role=role,
         )
         saved = self._repo.save(user)
-        self._event_bus.publish(UserRegisteredEvent(user_id=saved.id, email=saved.email))
+        self._event_bus.publish(
+            UserRegisteredEvent(
+                user_id=saved.id,
+                email=saved.email))
         return saved
 
     def authenticate(self, email: str, password: str) -> User:
@@ -98,7 +102,8 @@ class UserService:
         user.name = new_name.strip()
         return self._repo.save(user)
 
-    def change_password(self, user_id: int, old_password: str, new_password: str) -> User:
+    def change_password(self, user_id: int, old_password: str,
+                        new_password: str) -> User:
         user = self.get_user(user_id)
         if user.password_hash != self._hash_password(old_password):
             raise InvalidCredentialsError("Old password is incorrect")

@@ -72,13 +72,15 @@ class InMemoryCourseRepository(IRepository[Course]):
 
     def find_published(self) -> List[Course]:
         from src.models.course import CourseStatus
-        return [c for c in self._store.values() if c.status == CourseStatus.PUBLISHED]
+        return [c for c in self._store.values() if c.status ==
+                CourseStatus.PUBLISHED]
 
     def find_by_teacher(self, teacher_id: int) -> List[Course]:
         return [c for c in self._store.values() if c.teacher_id == teacher_id]
 
     def find_by_category(self, category: str) -> List[Course]:
-        return [c for c in self._store.values() if c.category.lower() == category.lower()]
+        return [c for c in self._store.values() if c.category.lower()
+                == category.lower()]
 
 
 class InMemoryLessonRepository(IRepository[Lesson]):
@@ -203,7 +205,8 @@ class InMemoryAttemptRepository(IRepository[QuizAttempt]):
     def exists(self, entity_id: int) -> bool:
         return entity_id in self._store
 
-    def find_by_user_and_quiz(self, user_id: int, quiz_id: int) -> List[QuizAttempt]:
+    def find_by_user_and_quiz(self, user_id: int,
+                              quiz_id: int) -> List[QuizAttempt]:
         return [a for a in self._store.values()
                 if a.user_id == user_id and a.quiz_id == quiz_id]
 
@@ -247,6 +250,7 @@ class InMemoryLessonProgressRepository:
     def find(self, user_id: int, lesson_id: int) -> Optional[LessonProgress]:
         return self._store.get((user_id, lesson_id))
 
-    def find_by_user_and_course(self, user_id: int, course_id: int) -> List[LessonProgress]:
+    def find_by_user_and_course(self, user_id: int,
+                                course_id: int) -> List[LessonProgress]:
         return [p for p in self._store.values()
                 if p.user_id == user_id and p.course_id == course_id]

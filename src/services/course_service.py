@@ -100,7 +100,12 @@ class CourseService:
 
     def update_course(self, course_id: int, **kwargs) -> Course:
         course = self.get_course(course_id)
-        allowed = {"title", "description", "category", "difficulty", "max_students"}
+        allowed = {
+            "title",
+            "description",
+            "category",
+            "difficulty",
+            "max_students"}
         for key, val in kwargs.items():
             if key in allowed:
                 setattr(course, key, val)

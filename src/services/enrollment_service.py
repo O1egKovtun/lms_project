@@ -34,11 +34,13 @@ class EnrollmentService:
         course = self._course_service.get_course(course_id)
 
         if not course.is_published():
-            raise CourseNotPublishedError(f"Course {course_id} is not published")
+            raise CourseNotPublishedError(
+                f"Course {course_id} is not published")
         if not course.has_capacity():
             raise CourseFullError(f"Course {course_id} is full")
         if course_id in user.enrolled_course_ids:
-            raise AlreadyEnrolledError(f"User {user_id} already enrolled in course {course_id}")
+            raise AlreadyEnrolledError(
+                f"User {user_id} already enrolled in course {course_id}")
 
         user.enroll(course_id)
         course.increment_enrollment()
@@ -52,13 +54,17 @@ class EnrollmentService:
             total_lessons=len(lessons),
         )
         saved = self._progress_repo.save(progress)
-        self._event_bus.publish(StudentEnrolledEvent(user_id=user_id, course_id=course_id))
+        self._event_bus.publish(
+            StudentEnrolledEvent(
+                user_id=user_id,
+                course_id=course_id))
         return saved
 
     def unenroll(self, user_id: int, course_id: int) -> bool:
         user = self._user_service.get_user(user_id)
         if course_id not in user.enrolled_course_ids:
-            raise NotEnrolledError(f"User {user_id} not enrolled in course {course_id}")
+            raise NotEnrolledError(
+                f"User {user_id} not enrolled in course {course_id}")
 
         course = self._course_service.get_course(course_id)
         user.unenroll(course_id)
@@ -73,7 +79,8 @@ class EnrollmentService:
         user = self._user_service.get_user(user_id)
 
         if lesson.course_id not in user.enrolled_course_ids:
-            raise NotEnrolledError(f"User {user_id} not enrolled in course {lesson.course_id}")
+            raise NotEnrolledError(
+                f"User {user_id} not enrolled in course {lesson.course_id}")
 
         lesson_prog = self._lesson_progress_repo.find(user_id, lesson_id)
         if not lesson_prog:
@@ -91,7 +98,8 @@ class EnrollmentService:
             self._progress_repo.save(progress)
             if progress.is_completed():
                 self._event_bus.publish(
-                    CourseCompletedEvent(user_id=user_id, course_id=lesson.course_id)
+                    CourseCompletedEvent(
+                        user_id=user_id, course_id=lesson.course_id)
                 )
         return progress
 
@@ -111,5 +119,7 @@ class EnrollmentService:
         self._course_service.get_course(course_id)
         return len(self._progress_repo.find_by_course(course_id))
 
-    def get_lesson_progress(self, user_id: int, course_id: int) -> List[LessonProgress]:
-        return self._lesson_progress_repo.find_by_user_and_course(user_id, course_id)
+    def get_lesson_progress(self, user_id: int,
+                            course_id: int) -> List[LessonProgress]:
+        return self._lesson_progress_repo.find_by_user_and_course(
+            user_id, course_id)

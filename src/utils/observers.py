@@ -44,10 +44,12 @@ class EventBus:
         self._listeners: Dict[Type[BaseEvent], List[Callable]] = {}
         self._history: List[BaseEvent] = []
 
-    def subscribe(self, event_type: Type[BaseEvent], handler: Callable) -> None:
+    def subscribe(
+            self, event_type: Type[BaseEvent], handler: Callable) -> None:
         self._listeners.setdefault(event_type, []).append(handler)
 
-    def unsubscribe(self, event_type: Type[BaseEvent], handler: Callable) -> None:
+    def unsubscribe(
+            self, event_type: Type[BaseEvent], handler: Callable) -> None:
         if event_type in self._listeners:
             self._listeners[event_type] = [
                 h for h in self._listeners[event_type] if h != handler

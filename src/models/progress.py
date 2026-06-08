@@ -38,7 +38,8 @@ class CourseProgress:
     def completion_percent(self) -> float:
         if self.total_lessons == 0:
             return 0.0
-        return round(len(self.completed_lesson_ids) / self.total_lessons * 100, 2)
+        return round(len(self.completed_lesson_ids) /
+                     self.total_lessons * 100, 2)
 
     def start(self) -> None:
         if self.status == ProgressStatus.NOT_STARTED:
@@ -50,7 +51,8 @@ class CourseProgress:
             self.completed_lesson_ids.append(lesson_id)
         if self.status == ProgressStatus.NOT_STARTED:
             self.start()
-        if self.total_lessons > 0 and len(self.completed_lesson_ids) >= self.total_lessons:
+        if self.total_lessons > 0 and len(
+                self.completed_lesson_ids) >= self.total_lessons:
             self.status = ProgressStatus.COMPLETED
             self.completed_at = datetime.now()
 

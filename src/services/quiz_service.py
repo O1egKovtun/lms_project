@@ -11,7 +11,7 @@ from src.utils.exceptions import (
 )
 
 
-# ── Strategy Pattern: Grading ─────────────────────────────────────────────────
+# ── Strategy Pattern: Grading ───────────────────────────────────────────
 
 class IGradingStrategy(ABC):
     @abstractmethod
@@ -21,6 +21,7 @@ class IGradingStrategy(ABC):
 
 class StrictGradingStrategy(IGradingStrategy):
     """Full points only if ALL correct answers selected and nothing wrong."""
+
     def grade(self, question: Question, user_answer) -> float:
         correct = set(question.correct_answer_ids())
         if isinstance(user_answer, list):
@@ -32,6 +33,7 @@ class StrictGradingStrategy(IGradingStrategy):
 
 class PartialGradingStrategy(IGradingStrategy):
     """Partial points for partially correct multiple-choice."""
+
     def grade(self, question: Question, user_answer) -> float:
         correct = set(question.correct_answer_ids())
         if isinstance(user_answer, list):
@@ -42,7 +44,8 @@ class PartialGradingStrategy(IGradingStrategy):
             return 0.0
         true_positives = len(selected & correct)
         false_positives = len(selected - correct)
-        score = (true_positives - false_positives) / len(correct) * question.points
+        score = (true_positives - false_positives) / \
+            len(correct) * question.points
         return max(0.0, score)
 
 
@@ -62,7 +65,7 @@ class QuizService:
     def set_grading_strategy(self, strategy: IGradingStrategy) -> None:
         self._grading = strategy
 
-    # ── Quiz management ───────────────────────────────────────────────────────
+    # ── Quiz management ─────────────────────────────────────────────────────
 
     def create_quiz(self, course_id: int, title: str, description: str,
                     passing_score: int = 70, time_limit_minutes: Optional[int] = None,
@@ -101,7 +104,12 @@ class QuizService:
             raise ValueError("Points must be at least 1")
 
         answer_objs = [
-            Answer(id=i + 1, text=a["text"], is_correct=a.get("is_correct", False))
+            Answer(
+                id=i + 1,
+                text=a["text"],
+                is_correct=a.get(
+                    "is_correct",
+                    False))
             for i, a in enumerate(answers)
         ]
         q = Question(
@@ -122,7 +130,7 @@ class QuizService:
         self.get_quiz(quiz_id)
         return self._question_repo.find_by_quiz(quiz_id)
 
-    # ── Attempt flow ──────────────────────────────────────────────────────────
+    # ── Attempt flow ────────────────────────────────────────────────────────
 
     def start_attempt(self, user_id: int, quiz_id: int) -> QuizAttempt:
         quiz = self.get_quiz(quiz_id)
@@ -131,7 +139,11 @@ class QuizService:
             raise TooManyAttemptsError(
                 f"Max {quiz.max_attempts} attempts allowed for quiz {quiz_id}"
             )
-        attempt = QuizAttempt(id=0, quiz_id=quiz_id, user_id=user_id, answers={})
+        attempt = QuizAttempt(
+            id=0,
+            quiz_id=quiz_id,
+            user_id=user_id,
+            answers={})
         return self._attempt_repo.save(attempt)
 
     def submit_attempt(self, attempt_id: int, answers: Dict) -> QuizAttempt:
@@ -139,11 +151,14 @@ class QuizService:
         if not attempt:
             raise QuizNotFoundError(f"Attempt {attempt_id} not found")
         if attempt.finished_at is not None:
-            raise QuizAlreadyFinishedError(f"Attempt {attempt_id} already submitted")
+            raise QuizAlreadyFinishedError(
+                f"Attempt {attempt_id} already submitted")
 
         attempt.answers = answers
         quiz = self.get_quiz(attempt.quiz_id)
-        questions = self.get_questions(quiz.quiz_id if hasattr(quiz, 'quiz_id') else attempt.quiz_id)
+        questions = self.get_questions(
+            quiz.quiz_id if hasattr(
+                quiz, 'quiz_id') else attempt.quiz_id)
 
         total_score = 0.0
         max_score = 0.0
@@ -153,7 +168,8 @@ class QuizService:
             if user_ans is not None:
                 total_score += self._grading.grade(q, user_ans)
 
-        passed = quiz.is_passed((total_score / max_score * 100) if max_score > 0 else 0)
+        passed = quiz.is_passed(
+            (total_score / max_score * 100) if max_score > 0 else 0)
         attempt.finish(total_score, max_score, passed)
         return self._attempt_repo.save(attempt)
 
@@ -173,7 +189,8 @@ class QuizService:
             "finished_at": attempt.finished_at.isoformat() if attempt.finished_at else None,
         }
 
-    def get_user_attempts(self, user_id: int, quiz_id: int) -> List[QuizAttempt]:
+    def get_user_attempts(self, user_id: int,
+                          quiz_id: int) -> List[QuizAttempt]:
         return self._attempt_repo.find_by_user_and_quiz(user_id, quiz_id)
 
     def get_remaining_attempts(self, user_id: int, quiz_id: int) -> int:
