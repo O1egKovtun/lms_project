@@ -111,8 +111,8 @@ class InMemoryLessonRepository(IRepository[Lesson]):
         return entity_id in self._store
 
     def find_by_course(self, course_id: int) -> List[Lesson]:
-        lessons = [l for l in self._store.values() if l.course_id == course_id]
-        return sorted(lessons, key=lambda l: l.order)
+        lessons = [lesson for lesson in self._store.values() if lesson.course_id == course_id]
+        return sorted(lessons, key=lambda lesson: lesson.order)
 
 
 class InMemoryQuizRepository(IRepository[Quiz]):

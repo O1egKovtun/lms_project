@@ -1,8 +1,8 @@
 import hashlib
 import re
-from typing import Optional, List
+from typing import List
 
-from src.models.user import User, UserRole, UserStatus
+from src.models.user import User, UserRole
 from src.storage.repositories import InMemoryUserRepository
 from src.utils.exceptions import (
     UserNotFoundError, EmailAlreadyExistsError,

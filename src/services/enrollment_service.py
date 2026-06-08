@@ -1,6 +1,6 @@
 from typing import List
 
-from src.models.progress import CourseProgress, LessonProgress, ProgressStatus
+from src.models.progress import CourseProgress, LessonProgress
 from src.storage.repositories import (
     InMemoryUserRepository, InMemoryCourseProgressRepository,
     InMemoryLessonProgressRepository

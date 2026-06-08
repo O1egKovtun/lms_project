@@ -6,8 +6,8 @@ from src.storage.repositories import (
     InMemoryQuizRepository, InMemoryQuestionRepository, InMemoryAttemptRepository
 )
 from src.utils.exceptions import (
-    QuizNotFoundError, QuestionNotFoundError,
-    TooManyAttemptsError, QuizAlreadyFinishedError
+    QuizNotFoundError, TooManyAttemptsError,
+    QuizAlreadyFinishedError
 )
 
 

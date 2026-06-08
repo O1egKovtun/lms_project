@@ -1,11 +1,10 @@
 from typing import List, Optional
 from datetime import datetime
 
-from src.models.course import Course, Lesson, CourseStatus, DifficultyLevel
+from src.models.course import Course, Lesson, DifficultyLevel
 from src.storage.repositories import InMemoryCourseRepository, InMemoryLessonRepository
 from src.utils.exceptions import (
-    CourseNotFoundError, LessonNotFoundError,
-    CourseNotPublishedError, CourseFullError
+    CourseNotFoundError, LessonNotFoundError
 )
 
 

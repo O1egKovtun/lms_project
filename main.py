@@ -17,7 +17,7 @@ from src.utils.exceptions import LMSBaseError
 
 app = Flask(__name__)
 
-# ── Dependency wiring ─────────────────────────────────────────────────────────
+# ── Dependency wiring ───────────────────────────────────────────────────
 event_bus = EventBus()
 user_repo = InMemoryUserRepository()
 course_repo = InMemoryCourseRepository()
@@ -37,17 +37,18 @@ enrollment_svc = EnrollmentService(
 quiz_svc = QuizService(quiz_repo, question_repo, attempt_repo)
 
 
-# ── Error handling ────────────────────────────────────────────────────────────
+# ── Error handling ──────────────────────────────────────────────────────
 @app.errorhandler(LMSBaseError)
 def handle_lms_error(e):
     return jsonify({"success": False, "error": str(e)}), 400
+
 
 @app.errorhandler(ValueError)
 def handle_value_error(e):
     return jsonify({"success": False, "error": str(e)}), 400
 
 
-# ── Root ──────────────────────────────────────────────────────────────────────
+# ── Root ────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
     return jsonify({
@@ -56,7 +57,7 @@ def index():
         "status": "running",
         "author": "Ковтун Олег, ФеП-32",
         "endpoints": {
-            "health":      "GET  /health",
+            "health": "GET  /health",
             "users": [
                 "POST /users",
                 "GET  /users/<id>",
@@ -88,13 +89,13 @@ def index():
     })
 
 
-# ── Health ────────────────────────────────────────────────────────────────────
+# ── Health ──────────────────────────────────────────────────────────────
 @app.route("/health")
 def health():
     return jsonify({"status": "ok", "service": "LMS API"})
 
 
-# ── Users ─────────────────────────────────────────────────────────────────────
+# ── Users ───────────────────────────────────────────────────────────────
 @app.route("/users", methods=["POST"])
 def register_user():
     data = request.get_json() or {}
@@ -105,26 +106,34 @@ def register_user():
         password=data.get("password", ""),
         role=role,
     )
-    return jsonify({"success": True, "user_id": user.id, "name": user.name}), 201
+    return jsonify(
+        {"success": True, "user_id": user.id, "name": user.name}), 201
+
 
 @app.route("/users/<int:user_id>")
 def get_user(user_id):
     profile = user_svc.get_profile(user_id)
     return jsonify({"success": True, "user": profile})
 
+
 @app.route("/users/<int:user_id>/block", methods=["POST"])
 def block_user(user_id):
     user_svc.block_user(user_id)
     return jsonify({"success": True, "message": f"User {user_id} blocked"})
 
+
 @app.route("/users/authenticate", methods=["POST"])
 def authenticate():
     data = request.get_json() or {}
-    user = user_svc.authenticate(data.get("email", ""), data.get("password", ""))
-    return jsonify({"success": True, "user_id": user.id, "role": user.role.value})
+    user = user_svc.authenticate(
+        data.get(
+            "email", ""), data.get(
+            "password", ""))
+    return jsonify(
+        {"success": True, "user_id": user.id, "role": user.role.value})
 
 
-# ── Courses ───────────────────────────────────────────────────────────────────
+# ── Courses ─────────────────────────────────────────────────────────────
 @app.route("/courses", methods=["GET"])
 def list_courses():
     courses = course_svc.get_published_courses()
@@ -133,6 +142,7 @@ def list_courses():
          "difficulty": c.difficulty.value, "enrolled": c.enrolled_count}
         for c in courses
     ]})
+
 
 @app.route("/courses", methods=["POST"])
 def create_course():
@@ -148,10 +158,12 @@ def create_course():
     )
     return jsonify({"success": True, "course_id": course.id}), 201
 
+
 @app.route("/courses/<int:course_id>/publish", methods=["POST"])
 def publish_course(course_id):
     course = course_svc.publish_course(course_id)
     return jsonify({"success": True, "status": course.status.value})
+
 
 @app.route("/courses/<int:course_id>/lessons", methods=["POST"])
 def add_lesson(course_id):
@@ -165,26 +177,33 @@ def add_lesson(course_id):
     )
     return jsonify({"success": True, "lesson_id": lesson.id}), 201
 
+
 @app.route("/courses/<int:course_id>/lessons", methods=["GET"])
 def get_lessons(course_id):
     lessons = course_svc.get_course_lessons(course_id)
     return jsonify({"success": True, "lessons": [
-        {"id": l.id, "title": l.title, "order": l.order, "duration": l.duration_minutes}
+        {"id": l.id, "title": l.title, "order": l.order,
+            "duration": l.duration_minutes}
         for l in lessons
     ]})
 
 
-# ── Enrollment ────────────────────────────────────────────────────────────────
+# ── Enrollment ──────────────────────────────────────────────────────────
 @app.route("/enrollments", methods=["POST"])
 def enroll():
     data = request.get_json() or {}
-    progress = enrollment_svc.enroll(data.get("user_id", 0), data.get("course_id", 0))
+    progress = enrollment_svc.enroll(
+        data.get(
+            "user_id", 0), data.get(
+            "course_id", 0))
     return jsonify({"success": True, "status": progress.status.value}), 201
+
 
 @app.route("/enrollments/<int:user_id>/<int:course_id>", methods=["DELETE"])
 def unenroll(user_id, course_id):
     enrollment_svc.unenroll(user_id, course_id)
     return jsonify({"success": True, "message": "Unenrolled"})
+
 
 @app.route("/enrollments/<int:user_id>/<int:course_id>/progress")
 def get_progress(user_id, course_id):
@@ -197,6 +216,7 @@ def get_progress(user_id, course_id):
         "total_lessons": prog.total_lessons,
     })
 
+
 @app.route("/enrollments/<int:user_id>/courses")
 def user_courses(user_id):
     progs = enrollment_svc.get_user_courses(user_id)
@@ -205,6 +225,7 @@ def user_courses(user_id):
          "completion_percent": p.completion_percent}
         for p in progs
     ]})
+
 
 @app.route("/lessons/<int:lesson_id>/complete", methods=["POST"])
 def complete_lesson(lesson_id):
@@ -217,7 +238,7 @@ def complete_lesson(lesson_id):
     })
 
 
-# ── Quizzes ───────────────────────────────────────────────────────────────────
+# ── Quizzes ─────────────────────────────────────────────────────────────
 @app.route("/quizzes", methods=["POST"])
 def create_quiz():
     data = request.get_json() or {}
@@ -230,6 +251,7 @@ def create_quiz():
         max_attempts=data.get("max_attempts", 3),
     )
     return jsonify({"success": True, "quiz_id": quiz.id}), 201
+
 
 @app.route("/quizzes/<int:quiz_id>/questions", methods=["POST"])
 def add_question(quiz_id):
@@ -245,11 +267,13 @@ def add_question(quiz_id):
     )
     return jsonify({"success": True, "question_id": question.id}), 201
 
+
 @app.route("/quizzes/<int:quiz_id>/attempts", methods=["POST"])
 def start_attempt(quiz_id):
     data = request.get_json() or {}
     attempt = quiz_svc.start_attempt(data.get("user_id", 0), quiz_id)
     return jsonify({"success": True, "attempt_id": attempt.id}), 201
+
 
 @app.route("/attempts/<int:attempt_id>/submit", methods=["POST"])
 def submit_attempt(attempt_id):
@@ -262,6 +286,7 @@ def submit_attempt(attempt_id):
         "score": attempt.score,
         "max_score": attempt.max_score,
     })
+
 
 @app.route("/quizzes/<int:quiz_id>/results/<int:user_id>")
 def quiz_results(quiz_id, user_id):
