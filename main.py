@@ -48,9 +48,11 @@ def handle_value_error(e):
     return jsonify({"success": False, "error": str(e)}), 400
 
 
+# ── Root ────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 # ── Health ──────────────────────────────────────────────────────────────
 @app.route("/health")
@@ -69,8 +71,7 @@ def register_user():
         password=data.get("password", ""),
         role=role,
     )
-    return jsonify(
-        {"success": True, "user_id": user.id, "name": user.name}), 201
+    return jsonify({"success": True, "user_id": user.id, "name": user.name}), 201
 
 
 @app.route("/users/<int:user_id>")
@@ -88,12 +89,8 @@ def block_user(user_id):
 @app.route("/users/authenticate", methods=["POST"])
 def authenticate():
     data = request.get_json() or {}
-    user = user_svc.authenticate(
-        data.get(
-            "email", ""), data.get(
-            "password", ""))
-    return jsonify(
-        {"success": True, "user_id": user.id, "role": user.role.value})
+    user = user_svc.authenticate(data.get("email", ""), data.get("password", ""))
+    return jsonify({"success": True, "user_id": user.id, "role": user.role.value})
 
 
 # ── Courses ─────────────────────────────────────────────────────────────
@@ -146,7 +143,7 @@ def get_lessons(course_id):
     lessons = course_svc.get_course_lessons(course_id)
     return jsonify({"success": True, "lessons": [
         {"id": item.id, "title": item.title, "order": item.order,
-            "duration": item.duration_minutes}
+         "duration": item.duration_minutes}
         for item in lessons
     ]})
 
@@ -155,10 +152,7 @@ def get_lessons(course_id):
 @app.route("/enrollments", methods=["POST"])
 def enroll():
     data = request.get_json() or {}
-    progress = enrollment_svc.enroll(
-        data.get(
-            "user_id", 0), data.get(
-            "course_id", 0))
+    progress = enrollment_svc.enroll(data.get("user_id", 0), data.get("course_id", 0))
     return jsonify({"success": True, "status": progress.status.value}), 201
 
 
@@ -265,4 +259,4 @@ def quiz_results(quiz_id, user_id):
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host="0.0.0.0", port=port, debug=False)
