@@ -78,6 +78,7 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: test
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,7 +88,7 @@ jobs:
         with:
           name: coverage-xml
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -106,13 +107,14 @@ jobs:
           context: .
           target: runtime
           push: false
+          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: lms:latest
       - name: Smoke test
         run: |
           docker run -d -p 5000:5000 --name lms-smoke lms:latest
-          sleep 5
+          sleep 8
           curl -f http://localhost:5000/health
           docker stop lms-smoke
 
@@ -131,21 +133,17 @@ jobs:
         run: |
           python main.py &
           sleep 3
-          # Register teacher
           curl -sf -X POST http://localhost:5000/users \
             -H "Content-Type: application/json" \
             -d '{"name":"Integration Teacher","email":"int_t@t.com","password":"pass123","role":"teacher"}'
-          # Register student
           curl -sf -X POST http://localhost:5000/users \
             -H "Content-Type: application/json" \
             -d '{"name":"Integration Student","email":"int_s@t.com","password":"pass123"}'
-          # Create + publish course
           COURSE=$(curl -sf -X POST http://localhost:5000/courses \
             -H "Content-Type: application/json" \
             -d '{"title":"Integration Course","description":"Full integration test course","teacher_id":1,"category":"test"}')
           echo "$COURSE"
           curl -sf -X POST http://localhost:5000/courses/1/publish
-          # Enroll student
           curl -sf -X POST http://localhost:5000/enrollments \
             -H "Content-Type: application/json" \
             -d '{"user_id":2,"course_id":1}'

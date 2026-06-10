@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from src.storage.repositories import (
     InMemoryUserRepository, InMemoryCourseRepository,
     InMemoryLessonRepository, InMemoryQuizRepository,
@@ -48,46 +48,9 @@ def handle_value_error(e):
     return jsonify({"success": False, "error": str(e)}), 400
 
 
-# ── Root ────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
-    return jsonify({
-        "service": "LMS Platform API",
-        "version": "1.0.0",
-        "status": "running",
-        "author": "Ковтун Олег, ФеП-32",
-        "endpoints": {
-            "health": "GET  /health",
-            "users": [
-                "POST /users",
-                "GET  /users/<id>",
-                "POST /users/<id>/block",
-                "POST /users/authenticate",
-            ],
-            "courses": [
-                "GET  /courses",
-                "POST /courses",
-                "POST /courses/<id>/publish",
-                "POST /courses/<id>/lessons",
-                "GET  /courses/<id>/lessons",
-            ],
-            "enrollment": [
-                "POST   /enrollments",
-                "DELETE /enrollments/<uid>/<cid>",
-                "GET    /enrollments/<uid>/<cid>/progress",
-                "GET    /enrollments/<uid>/courses",
-                "POST   /lessons/<id>/complete",
-            ],
-            "quizzes": [
-                "POST /quizzes",
-                "POST /quizzes/<id>/questions",
-                "POST /quizzes/<id>/attempts",
-                "POST /attempts/<id>/submit",
-                "GET  /quizzes/<id>/results/<uid>",
-            ],
-        }
-    })
-
+    return render_template("index.html")
 
 # ── Health ──────────────────────────────────────────────────────────────
 @app.route("/health")
@@ -302,4 +265,4 @@ def quiz_results(quiz_id, user_id):
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host='127.0.0.1', port=5000)

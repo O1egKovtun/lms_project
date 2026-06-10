@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LMS Platform</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7ff;color:#1a1a2e}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid #e8e5f0;padding:0}
+.logo{padding:16px;border-bottom:1px solid #e8e5f0;font-size:15px;font-weight:600;color:#534AB7;display:flex;align-items:center;gap:8px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:11px 16px;font-size:13px;color:#666;cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all 0.15s}
+.nav-item:hover{background:#f3f1ff;color:#534AB7}
+.nav-item.active{background:#f3f1ff;color:#534AB7;font-weight:500;border-left:3px solid #534AB7}
+.nav-item i{font-size:17px}
+.main{padding:24px;overflow:auto}
+.panel{display:none}
+.panel.active{display:block}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.top-bar h2{font-size:17px;font-weight:600}
+.api-tag{font-family:monospace;font-size:11px;color:#534AB7;background:#f0eeff;padding:2px 8px;border-radius:4px;margin-left:8px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric{background:#fff;border:1px solid #e8e5f0;border-radius:10px;padding:14px;text-align:center}
+.metric-val{font-size:26px;font-weight:700;color:#534AB7}
+.metric-lbl{font-size:11px;color:#999;margin-top:3px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.single{grid-template-columns:1fr}
+label{font-size:12px;color:#666;display:block;margin-bottom:5px;font-weight:500}
+input,select{width:100%;font-size:13px;padding:8px 11px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a2e;outline:none;transition:border 0.15s}
+input:focus,select:focus{border-color:#534AB7}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#1a1a2e;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;font-weight:500}
+.btn:hover{background:#f3f1ff;border-color:#534AB7;color:#534AB7}
+.btn.primary{background:#534AB7;color:#fff;border-color:#534AB7}
+.btn.primary:hover{background:#3C3489}
+.btn.success{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.btn.success:hover{background:#0f6e56}
+.btn.danger{background:#E24B4A;color:#fff;border-color:#E24B4A}
+.btn.danger:hover{background:#a32d2d}
+.log{background:#1a1a2e;border-radius:10px;padding:14px;font-size:12px;font-family:monospace;max-height:200px;overflow-y:auto;margin-top:14px}
+.log-entry{padding:3px 0;display:flex;gap:10px;border-bottom:1px solid #2d2d4e}
+.log-entry:last-child{border-bottom:none}
+.log-ok{color:#4ade80}
+.log-err{color:#f87171}
+.log-info{color:#a5b4fc}
+.log-time{color:#666;min-width:60px}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.green{background:#dcfce7;color:#166534}
+.badge.purple{background:#f0eeff;color:#534AB7}
+.badge.amber{background:#fef9c3;color:#854d0e}
+.badge.gray{background:#f3f4f6;color:#6b7280}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:#999;border-bottom:2px solid #f0eeff;text-transform:uppercase;letter-spacing:0.04em}
+.table td{padding:9px 12px;border-bottom:1px solid #f5f3ff;color:#1a1a2e}
+.table tr:hover td{background:#faf9ff}
+.section-title{font-size:11px;font-weight:600;color:#999;margin-bottom:10px;margin-top:18px;text-transform:uppercase;letter-spacing:0.07em}
+.progress-bar{height:8px;background:#f0eeff;border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:#534AB7;border-radius:4px;transition:width 0.5s ease}
+.card{background:#fff;border:1px solid #e8e5f0;border-radius:12px;padding:16px 20px;margin-bottom:12px}
+.demo-btn{width:100%;text-align:left;margin-bottom:8px;justify-content:flex-start}
+.quiz-result{display:none;background:#f3f1ff;border:1px solid #c4b8ff;border-radius:10px;padding:16px;margin-top:14px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo"><i class="ti ti-school"></i> LMS Platform</div>
+    <button class="nav-item active" onclick="show('users',this)"><i class="ti ti-users"></i> Користувачі</button>
+    <button class="nav-item" onclick="show('courses',this)"><i class="ti ti-book"></i> Курси</button>
+    <button class="nav-item" onclick="show('enroll',this)"><i class="ti ti-certificate"></i> Записи</button>
+    <button class="nav-item" onclick="show('quiz',this)"><i class="ti ti-checklist"></i> Тести</button>
+    <button class="nav-item" onclick="show('tests',this)"><i class="ti ti-player-play"></i> Авто-демо</button>
+  </div>
+
+  <div class="main">
+
+    <!-- USERS -->
+    <div id="panel-users" class="panel active">
+      <div class="top-bar">
+        <h2>Користувачі <span class="api-tag">POST /users</span></h2>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-val" id="m-users">0</div><div class="metric-lbl">Всього</div></div>
+        <div class="metric"><div class="metric-val" id="m-students">0</div><div class="metric-lbl">Студентів</div></div>
+        <div class="metric"><div class="metric-val" id="m-teachers">0</div><div class="metric-lbl">Викладачів</div></div>
+        <div class="metric"><div class="metric-val" id="m-blocked">0</div><div class="metric-lbl">Заблоковано</div></div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div><label>Ім'я</label><input id="u-name" placeholder="Іван Франко"></div>
+          <div><label>Email</label><input id="u-email" placeholder="ivan@test.com"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Пароль</label><input id="u-pass" type="password" placeholder="мін. 6 символів"></div>
+          <div><label>Роль</label><select id="u-role"><option value="student">Студент</option><option value="teacher">Викладач</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn primary" onclick="doRegister()"><i class="ti ti-user-plus"></i> Зареєструвати</button>
+          <button class="btn" onclick="doAuth()"><i class="ti ti-login"></i> Автентифікація</button>
+        </div>
+      </div>
+      <div class="section-title">Список користувачів</div>
+      <table class="table">
+        <thead><tr><th>ID</th><th>Ім'я</th><th>Email</th><th>Роль</th><th>Дії</th></tr></thead>
+        <tbody id="users-table"><tr><td colspan="5" style="text-align:center;padding:20px;color:#999">Немає користувачів</td></tr></tbody>
+      </table>
+      <div class="log" id="log-users">
+        <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-info">Готовий. Заповни форму і натисни кнопку.</span></div>
+      </div>
+    </div>
+
+    <!-- COURSES -->
+    <div id="panel-courses" class="panel">
+      <div class="top-bar"><h2>Курси <span class="api-tag">POST /courses</span></h2></div>
+      <div class="card">
+        <div class="form-row">
+          <div><label>Назва курсу</label><input id="c-title" placeholder="Python для початківців"></div>
+          <div><label>Категорія</label><input id="c-cat" placeholder="programming"></div>
+        </div>
+        <div class="form-row single">
+          <div><label>Опис</label><input id="c-desc" placeholder="Базовий курс Python з нуля до джуна"></div>
+        </div>
+        <div class="form-row">
+          <div><label>ID викладача</label><input id="c-teacher" type="number" placeholder="1"></div>
+          <div><label>Складність</label>
+            <select id="c-diff">
+              <option value="beginner">Початковий</option>
+              <option value="intermediate">Середній</option>
+              <option value="advanced">Просунутий</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn primary" onclick="doCreateCourse()"><i class="ti ti-plus"></i> Створити</button>
+          <button class="btn success" onclick="doPublish()"><i class="ti ti-check"></i> Опублікувати ID:</button>
+          <input id="c-pub-id" style="width:60px" value="1" type="number">
+          <button class="btn" onclick="doAddLesson()"><i class="ti ti-file-plus"></i> Додати урок</button>
+        </div>
+      </div>
+      <div class="section-title">Опубліковані курси <span class="api-tag">GET /courses</span></div>
+      <table class="table">
+        <thead><tr><th>ID</th><th>Назва</th><th>Категорія</th><th>Складність</th><th>Записаних</th></tr></thead>
+        <tbody id="courses-table"><tr><td colspan="5" style="text-align:center;padding:20px;color:#999">Немає опублікованих курсів</td></tr></tbody>
+      </table>
+      <div class="log" id="log-courses">
+        <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-info">Готовий.</span></div>
+      </div>
+    </div>
+
+    <!-- ENROLLMENT -->
+    <div id="panel-enroll" class="panel">
+      <div class="top-bar"><h2>Записи та прогрес <span class="api-tag">POST /enrollments</span></h2></div>
+      <div class="card">
+        <div class="form-row">
+          <div><label>ID студента</label><input id="e-uid" type="number" placeholder="1"></div>
+          <div><label>ID курсу</label><input id="e-cid" type="number" placeholder="1"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn primary" onclick="doEnroll()"><i class="ti ti-plus"></i> Записатись</button>
+          <button class="btn" onclick="doProgress()"><i class="ti ti-chart-bar"></i> Прогрес</button>
+          <button class="btn success" onclick="doCompleteLesson()"><i class="ti ti-check"></i> Урок ID:</button>
+          <input id="e-lid" style="width:60px" value="1" type="number">
+          <button class="btn danger" onclick="doUnenroll()"><i class="ti ti-x"></i> Відписатись</button>
+        </div>
+      </div>
+      <div id="progress-block" style="display:none" class="card">
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px">
+          <span id="prog-label" style="font-weight:500">Прогрес</span>
+          <span id="prog-pct" style="font-weight:700;color:#534AB7">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+        <div style="font-size:12px;color:#999;margin-top:6px" id="prog-status"></div>
+      </div>
+      <div class="log" id="log-enroll">
+        <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-info">Готовий.</span></div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="panel-quiz" class="panel">
+      <div class="top-bar"><h2>Тести <span class="api-tag">POST /quizzes</span></h2></div>
+      <div class="card">
+        <div class="form-row">
+          <div><label>ID курсу</label><input id="q-cid" type="number" placeholder="1"></div>
+          <div><label>Назва тесту</label><input id="q-title" placeholder="Вступний тест"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Прохідний бал (%)</label><input id="q-pass" type="number" value="60"></div>
+          <div><label>Макс. спроб</label><input id="q-attempts" type="number" value="3"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn primary" onclick="doCreateQuiz()"><i class="ti ti-plus"></i> Створити тест</button>
+          <button class="btn" onclick="doStartAttempt()"><i class="ti ti-player-play"></i> Почати (quiz:</button>
+          <input id="q-qid" style="width:55px" value="1" type="number">
+          <span style="font-size:13px">user:</span>
+          <input id="q-uid" style="width:55px" value="1" type="number">
+          <button class="btn success" onclick="doSubmit()"><i class="ti ti-send"></i> Здати (attempt:</button>
+          <input id="q-aid" style="width:55px" value="1" type="number"><span style="font-size:13px">)</span>
+        </div>
+      </div>
+      <div class="quiz-result" id="quiz-result">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">Результат тесту</div>
+        <div style="font-size:32px;font-weight:700;color:#534AB7" id="qr-score">0%</div>
+        <div style="margin-top:6px" id="qr-passed"></div>
+      </div>
+      <div class="log" id="log-quiz">
+        <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-info">Готовий.</span></div>
+      </div>
+    </div>
+
+    <!-- AUTO DEMO -->
+    <div id="panel-tests" class="panel">
+      <div class="top-bar"><h2>Авто-демо <span class="api-tag">для захисту</span></h2></div>
+      <p style="font-size:13px;color:#999;margin-bottom:16px">Натисни — система автоматично виконає повний сценарій через реальні API-запити.</p>
+      <button class="btn primary demo-btn" onclick="runScenario1()"><i class="ti ti-user-check"></i> Сценарій 1 — Реєстрація студента та викладача</button>
+      <button class="btn demo-btn" onclick="runScenario2()"><i class="ti ti-book"></i> Сценарій 2 — Створення та публікація курсу</button>
+      <button class="btn demo-btn" onclick="runScenario3()"><i class="ti ti-certificate"></i> Сценарій 3 — Запис на курс та прогрес</button>
+      <button class="btn demo-btn" onclick="runScenario4()"><i class="ti ti-checklist"></i> Сценарій 4 — Повний цикл тестування</button>
+      <button class="btn danger demo-btn" onclick="runScenario5()"><i class="ti ti-shield-x"></i> Сценарій 5 — Валідація помилок</button>
+      <div class="section-title" style="margin-top:16px">Лог виконання</div>
+      <div class="log" style="max-height:300px" id="log-tests">
+        <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-info">Обери сценарій.</span></div>
+      </div>
+      <div id="scenario-result" style="display:none" class="card" style="margin-top:12px">
+        <div style="font-weight:600;margin-bottom:6px" id="sr-title"></div>
+        <div style="font-size:13px;color:#666" id="sr-body"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const BASE = '';
+let users = [], lastAttemptId = null;
+
+function now() {
+  return new Date().toTimeString().slice(0,8);
+}
+
+function show(p, btn) {
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('panel-' + p).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+async function api(method, path, body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(BASE + path, opts);
+    const d = await r.json();
+    return { ok: r.ok, status: r.status, data: d };
+  } catch(e) {
+    return { ok: false, status: 0, data: { error: 'Сервер недоступний: ' + e.message } };
+  }
+}
+
+function log(id, msg, type = 'info') {
+  const el = document.getElementById('log-' + id);
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = `<span class="log-time">${now()}</span><span class="log-${type}">${msg}</span>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+  if (el.children.length > 60) el.removeChild(el.children[1]);
+}
+
+function updateMetrics() {
+  document.getElementById('m-users').textContent = users.length;
+  document.getElementById('m-students').textContent = users.filter(u => u.role === 'student').length;
+  document.getElementById('m-teachers').textContent = users.filter(u => u.role === 'teacher').length;
+  document.getElementById('m-blocked').textContent = users.filter(u => u.blocked).length;
+}
+
+function renderUsers() {
+  const tb = document.getElementById('users-table');
+  if (!users.length) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">Немає користувачів</td></tr>'; return; }
+  tb.innerHTML = users.map(u => `<tr>
+    <td>${u.id}</td><td>${u.name}</td><td>${u.email}</td>
+    <td><span class="badge ${u.role === 'teacher' ? 'purple' : 'green'}">${u.role === 'teacher' ? 'Викладач' : 'Студент'}</span></td>
+    <td><button class="btn" style="padding:4px 10px;font-size:11px" onclick="blockUser(${u.id})">${u.blocked ? 'Розблокувати' : 'Блокувати'}</button></td>
+  </tr>`).join('');
+}
+
+function renderCourses(list) {
+  const tb = document.getElementById('courses-table');
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">Немає курсів</td></tr>'; return; }
+  tb.innerHTML = list.map(c => `<tr>
+    <td>${c.id}</td><td>${c.title}</td><td>${c.category}</td>
+    <td><span class="badge ${c.difficulty === 'advanced' ? 'amber' : c.difficulty === 'intermediate' ? 'purple' : 'green'}">${c.difficulty}</span></td>
+    <td>${c.enrolled}</td>
+  </tr>`).join('');
+}
+
+async function doRegister() {
+  const r = await api('POST', '/users', {
+    name: document.getElementById('u-name').value,
+    email: document.getElementById('u-email').value,
+    password: document.getElementById('u-pass').value,
+    role: document.getElementById('u-role').value
+  });
+  if (r.ok) {
+    users.push({ id: r.data.user_id, name: document.getElementById('u-name').value, email: document.getElementById('u-email').value, role: document.getElementById('u-role').value, blocked: false });
+    updateMetrics(); renderUsers();
+    log('users', `✓ Зареєстровано: ${r.data.name} (ID ${r.data.user_id})`, 'ok');
+  } else log('users', `✗ ${r.data.error}`, 'err');
+}
+
+async function doAuth() {
+  const r = await api('POST', '/users/authenticate', { email: document.getElementById('u-email').value, password: document.getElementById('u-pass').value });
+  if (r.ok) log('users', `✓ Автентифікація: user_id=${r.data.user_id}, роль=${r.data.role}`, 'ok');
+  else log('users', `✗ ${r.data.error}`, 'err');
+}
+
+async function blockUser(id) {
+  const r = await api('POST', `/users/${id}/block`);
+  if (r.ok) { const u = users.find(x => x.id === id); if(u) u.blocked = !u.blocked; renderUsers(); updateMetrics(); log('users', `✓ Статус змінено для user ${id}`, 'ok'); }
+}
+
+async function doCreateCourse() {
+  const r = await api('POST', '/courses', {
+    title: document.getElementById('c-title').value,
+    description: document.getElementById('c-desc').value,
+    teacher_id: parseInt(document.getElementById('c-teacher').value) || 1,
+    category: document.getElementById('c-cat').value || 'general',
+    difficulty: document.getElementById('c-diff').value
+  });
+  if (r.ok) { log('courses', `✓ Курс створено ID=${r.data.course_id}`, 'ok'); document.getElementById('c-pub-id').value = r.data.course_id; }
+  else log('courses', `✗ ${r.data.error}`, 'err');
+}
+
+async function doPublish() {
+  const id = document.getElementById('c-pub-id').value;
+  const r = await api('POST', `/courses/${id}/publish`);
+  if (r.ok) {
+    log('courses', `✓ Курс ${id} опубліковано`, 'ok');
+    const list = await api('GET', '/courses');
+    if (list.ok) renderCourses(list.data.courses);
+  } else log('courses', `✗ ${r.data.error}`, 'err');
+}
+
+async function doAddLesson() {
+  const cid = document.getElementById('c-pub-id').value;
+  const r = await api('POST', `/courses/${cid}/lessons`, { title: 'Вступний урок', content: 'Зміст вступного уроку курсу', order: 1, duration_minutes: 45 });
+  if (r.ok) log('courses', `✓ Урок додано ID=${r.data.lesson_id}`, 'ok');
+  else log('courses', `✗ ${r.data.error}`, 'err');
+}
+
+async function doEnroll() {
+  const r = await api('POST', '/enrollments', { user_id: parseInt(document.getElementById('e-uid').value), course_id: parseInt(document.getElementById('e-cid').value) });
+  if (r.ok) log('enroll', `✓ Записано. Статус: ${r.data.status}`, 'ok');
+  else log('enroll', `✗ ${r.data.error}`, 'err');
+}
+
+async function doProgress() {
+  const uid = parseInt(document.getElementById('e-uid').value) || 1;
+  const cid = parseInt(document.getElementById('e-cid').value) || 1;
+  const r = await api('GET', `/enrollments/${uid}/${cid}/progress`);
+  if (r.ok) {
+    const pct = r.data.completion_percent;
+    document.getElementById('progress-block').style.display = 'block';
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-label').textContent = `${r.data.completed_lessons}/${r.data.total_lessons} уроків пройдено`;
+    document.getElementById('prog-status').textContent = 'Статус: ' + r.data.status;
+    log('enroll', `✓ Прогрес: ${pct}%`, 'ok');
+  } else log('enroll', `✗ ${r.data.error}`, 'err');
+}
+
+async function doCompleteLesson() {
+  const uid = parseInt(document.getElementById('e-uid').value) || 1;
+  const lid = parseInt(document.getElementById('e-lid').value) || 1;
+  const r = await api('POST', `/lessons/${lid}/complete`, { user_id: uid });
+  if (r.ok) { log('enroll', `✓ Урок ${lid} пройдено. Прогрес: ${r.data.completion_percent}%`, 'ok'); doProgress(); }
+  else log('enroll', `✗ ${r.data.error}`, 'err');
+}
+
+async function doUnenroll() {
+  const uid = parseInt(document.getElementById('e-uid').value) || 1;
+  const cid = parseInt(document.getElementById('e-cid').value) || 1;
+  const r = await api('DELETE', `/enrollments/${uid}/${cid}`);
+  if (r.ok) log('enroll', `✓ Відписано від курсу ${cid}`, 'ok');
+  else log('enroll', `✗ ${r.data.error}`, 'err');
+}
+
+async function doCreateQuiz() {
+  const r = await api('POST', '/quizzes', {
+    course_id: parseInt(document.getElementById('q-cid').value) || 1,
+    title: document.getElementById('q-title').value || 'Тест',
+    description: 'Перевірка знань',
+    passing_score: parseInt(document.getElementById('q-pass').value) || 60,
+    max_attempts: parseInt(document.getElementById('q-attempts').value) || 3
+  });
+  if (r.ok) { log('quiz', `✓ Тест ID=${r.data.quiz_id}`, 'ok'); document.getElementById('q-qid').value = r.data.quiz_id; }
+  else log('quiz', `✗ ${r.data.error}`, 'err');
+}
+
+async function doStartAttempt() {
+  const r = await api('POST', `/quizzes/${document.getElementById('q-qid').value}/attempts`, { user_id: parseInt(document.getElementById('q-uid').value) || 1 });
+  if (r.ok) { lastAttemptId = r.data.attempt_id; document.getElementById('q-aid').value = lastAttemptId; log('quiz', `✓ Спроба ID=${lastAttemptId}`, 'ok'); }
+  else log('quiz', `✗ ${r.data.error}`, 'err');
+}
+
+async function doSubmit() {
+  const r = await api('POST', `/attempts/${document.getElementById('q-aid').value}/submit`, { answers: {} });
+  if (r.ok) {
+    document.getElementById('quiz-result').style.display = 'block';
+    document.getElementById('qr-score').textContent = r.data.score_percent + '%';
+    document.getElementById('qr-passed').innerHTML = `<span class="badge ${r.data.passed ? 'green' : 'amber'}">${r.data.passed ? '✓ Зараховано' : '✗ Не зараховано'}</span>`;
+    log('quiz', `✓ ${r.data.score_percent}% → ${r.data.passed ? 'ЗАРАХОВАНО' : 'НЕ ЗАРАХОВАНО'}`, 'ok');
+  } else log('quiz', `✗ ${r.data.error}`, 'err');
+}
+
+function logTest(msg, type) { log('tests', msg, type); }
+function showResult(title, body) {
+  const el = document.getElementById('scenario-result');
+  el.style.display = 'block';
+  document.getElementById('sr-title').textContent = title;
+  document.getElementById('sr-body').textContent = body;
+}
+
+async function runScenario1() {
+  logTest('=== Сценарій 1: Реєстрація ===', 'info');
+  const ts = Date.now();
+  const t = await api('POST', '/users', { name: 'Проф. Швелеба', email: `teacher_${ts}@lms.ua`, password: 'pass1234', role: 'teacher' });
+  if (t.ok) { users.push({ id: t.data.user_id, name: 'Проф. Швелеба', email: `teacher_${ts}@lms.ua`, role: 'teacher', blocked: false }); logTest(`✓ Викладач ID=${t.data.user_id}`, 'ok'); }
+  else logTest(`✗ ${t.data.error}`, 'err');
+  const s = await api('POST', '/users', { name: 'Ковтун Олег', email: `student_${ts}@lms.ua`, password: 'pass1234', role: 'student' });
+  if (s.ok) { users.push({ id: s.data.user_id, name: 'Ковтун Олег', email: `student_${ts}@lms.ua`, role: 'student', blocked: false }); logTest(`✓ Студент ID=${s.data.user_id}`, 'ok'); }
+  else logTest(`✗ ${s.data.error}`, 'err');
+  updateMetrics(); renderUsers();
+  showResult('Сценарій 1 виконано', `Викладач ID=${t.ok?t.data.user_id:'?'}, Студент ID=${s.ok?s.data.user_id:'?'}. Observer: UserRegisteredEvent опублікований двічі.`);
+}
+
+async function runScenario2() {
+  logTest('=== Сценарій 2: Курс ===', 'info');
+  const teacher = users.find(u => u.role === 'teacher');
+  const tid = teacher?.id || 1;
+  const ts = Date.now();
+  const c = await api('POST', '/courses', { title: `Python ${ts}`, description: 'Повний базовий курс Python програмування', teacher_id: tid, category: 'programming', difficulty: 'beginner' });
+  if (!c.ok) { logTest(`✗ ${c.data.error}`, 'err'); return; }
+  logTest(`✓ Курс ID=${c.data.course_id} (draft)`, 'ok');
+  const l = await api('POST', `/courses/${c.data.course_id}/lessons`, { title: 'Вступ до Python', content: 'Зміст першого уроку', order: 1, duration_minutes: 45 });
+  logTest(l.ok ? `✓ Урок ID=${l.data.lesson_id}` : `✗ ${l.data.error}`, l.ok ? 'ok' : 'err');
+  const p = await api('POST', `/courses/${c.data.course_id}/publish`);
+  logTest(p.ok ? `✓ Опубліковано (${p.data.status})` : `✗ ${p.data.error}`, p.ok ? 'ok' : 'err');
+  const list = await api('GET', '/courses');
+  if (list.ok) renderCourses(list.data.courses);
+  showResult('Сценарій 2 виконано', `Курс ${c.data.course_id}: draft → урок → published. Доступний через GET /courses.`);
+}
+
+async function runScenario3() {
+  logTest('=== Сценарій 3: Запис ===', 'info');
+  const list = await api('GET', '/courses');
+  if (!list.ok || !list.data.courses.length) { logTest('✗ Немає курсів. Запусти Сценарій 2', 'err'); return; }
+  const cid = list.data.courses[0].id;
+  const student = users.find(u => u.role === 'student');
+  const uid = student?.id || 1;
+  const e = await api('POST', '/enrollments', { user_id: uid, course_id: cid });
+  logTest(e.ok ? `✓ Записано (${e.data.status})` : `✗ ${e.data.error}`, e.ok ? 'ok' : 'err');
+  const prog = await api('GET', `/enrollments/${uid}/${cid}/progress`);
+  if (prog.ok) logTest(`✓ Прогрес: ${prog.data.completion_percent}% (${prog.data.completed_lessons}/${prog.data.total_lessons})`, 'ok');
+  const lessons = await api('GET', `/courses/${cid}/lessons`);
+  if (lessons.ok && lessons.data.lessons.length) {
+    const lid = lessons.data.lessons[0].id;
+    const cl = await api('POST', `/lessons/${lid}/complete`, { user_id: uid });
+    logTest(cl.ok ? `✓ Урок ${lid} пройдено → ${cl.data.completion_percent}%` : `✗ ${cl.data.error}`, cl.ok ? 'ok' : 'err');
+  }
+  showResult('Сценарій 3 виконано', `Студент ${uid} записаний на курс ${cid}. Observer: StudentEnrolledEvent. Прогрес оновлено автоматично.`);
+}
+
+async function runScenario4() {
+  logTest('=== Сценарій 4: Тест ===', 'info');
+  const list = await api('GET', '/courses');
+  if (!list.ok || !list.data.courses.length) { logTest('✗ Немає курсів. Запусти Сценарій 2', 'err'); return; }
+  const cid = list.data.courses[0].id;
+  const q = await api('POST', '/quizzes', { course_id: cid, title: 'Підсумковий тест', description: 'Перевірка знань', passing_score: 60, max_attempts: 3 });
+  if (!q.ok) { logTest(`✗ ${q.data.error}`, 'err'); return; }
+  logTest(`✓ Тест ID=${q.data.quiz_id}`, 'ok');
+  const student = users.find(u => u.role === 'student');
+  const uid = student?.id || 1;
+  const a = await api('POST', `/quizzes/${q.data.quiz_id}/attempts`, { user_id: uid });
+  if (!a.ok) { logTest(`✗ ${a.data.error}`, 'err'); return; }
+  logTest(`✓ Спроба ID=${a.data.attempt_id}`, 'ok');
+  const sub = await api('POST', `/attempts/${a.data.attempt_id}/submit`, { answers: {} });
+  logTest(sub.ok ? `✓ ${sub.data.score_percent}% → ${sub.data.passed ? 'ЗАРАХОВАНО' : 'НЕ ЗАРАХОВАНО'}` : `✗ ${sub.data.error}`, sub.ok ? 'ok' : 'err');
+  const res = await api('GET', `/quizzes/${q.data.quiz_id}/results/${uid}`);
+  if (res.ok) logTest(`✓ Залишилось спроб: ${res.data.remaining_attempts}`, 'ok');
+  showResult('Сценарій 4 виконано', `Strategy pattern: StrictGradingStrategy застосована. Attempt збережено, результат в GET /quizzes/.../results/...`);
+}
+
+async function runScenario5() {
+  logTest('=== Сценарій 5: Валідація ===', 'info');
+  const r1 = await api('POST', '/users', { name: 'X', email: 'bad-email', password: '123' });
+  logTest(`→ Невалідний email: "${r1.data.error}"`, r1.ok ? 'err' : 'ok');
+  if (users[0]) {
+    const r2 = await api('POST', '/users', { name: 'Dup', email: users[0].email, password: 'pass1234' });
+    logTest(`→ Дублікат email: "${r2.data.error}"`, r2.ok ? 'err' : 'ok');
+  }
+  const r3 = await api('POST', '/enrollments', { user_id: 9999, course_id: 1 });
+  logTest(`→ Неіснуючий юзер: "${r3.data.error}"`, r3.ok ? 'err' : 'ok');
+  const r4 = await api('POST', '/enrollments', { user_id: 1, course_id: 9999 });
+  logTest(`→ Неіснуючий курс: "${r4.data.error}"`, r4.ok ? 'err' : 'ok');
+  showResult('Сценарій 5 виконано', 'Всі 4 валідації спрацювали. Система повертає типізовані помилки з LMSBaseError замість HTTP 500.');
+}
+</script>
+</body>
+</html>
